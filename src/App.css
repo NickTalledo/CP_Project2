@@ -1,0 +1,60 @@
+.App {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-family: sans-serif;
+  text-align: center;
+  background-image: url("https://static.foxnews.com/foxnews.com/content/uploads/2022/11/jets.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+body,
+.App {
+  margin: 0;
+  padding: 0;
+}
+
+.flash_card {
+  font-size: 24px;
+  width: 216px;
+  height: 180px;
+  border: 1px solid black;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.flash_card.front {
+  background-color: rgb(0, 0, 0);
+  color: white;
+}
+
+.flash_card.back {
+  background-color: rgb(255, 255, 255);
+}
+
+.next-card-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #00ff6a;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 18px;
+  transition: background-color 0.3s;
+}
+
+.next-card-btn:hover {
+  background-color: #00b35f;
+}
+
+h1,
+h2 {
+  color: white;
+}
