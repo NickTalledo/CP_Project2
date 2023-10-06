@@ -4,6 +4,9 @@ import Flashcard from "./routes/Flashcard";
 
 const App = () => {
   const [selectedCardIndex, setSelectedCardIndex] = useState(0);
+  const [userGuess, setUserGuess] = useState("");
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [isCorrect, setIsCorrect] = useState(false);
 
   const [flashcards, setFlashcards] = useState([
     {
@@ -46,13 +49,67 @@ const App = () => {
   ]);
 
   const handleNextCard = () => {
-    const randomIndex = Math.floor(Math.random() * flashcards.length);
+    setSelectedCardIndex((prevIndex) => (prevIndex + 1) % flashcards.length);
+    setUserGuess("");
+    setShowFeedback(false);
+  };
 
-    if (randomIndex !== selectedCardIndex) {
-      setSelectedCardIndex(randomIndex);
-    } else {
-      handleNextCard();
+  const handlePreviousCard = () => {
+    setSelectedCardIndex((prevIndex) =>
+      prevIndex === 0 ? flashcards.length - 1 : prevIndex - 1
+    );
+    setUserGuess("");
+    setShowFeedback(false);
+  };
+
+  const handleShuffleCards = () => {
+    const randomIndex = Math.floor(Math.random() * flashcards.length);
+    setSelectedCardIndex(randomIndex);
+    setUserGuess("");
+    setShowFeedback(false);
+  };
+
+  const calculateLevenshteinDistance = (a, b) => {
+    const dp = Array(a.length + 1)
+      .fill(null)
+      .map(() => Array(b.length + 1).fill(null));
+
+    for (let i = 0; i <= a.length; i++) {
+      dp[i][0] = i;
     }
+
+    for (let j = 0; j <= b.length; j++) {
+      dp[0][j] = j;
+    }
+
+    for (let i = 1; i <= a.length; i++) {
+      for (let j = 1; j <= b.length; j++) {
+        const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+        dp[i][j] = Math.min(
+          dp[i - 1][j] + 1,
+          dp[i][j - 1] + 1,
+          dp[i - 1][j - 1] + cost
+        );
+      }
+    }
+
+    return dp[a.length][b.length];
+  };
+
+  const handleSubmit = () => {
+    setShowFeedback(true);
+
+    const correctAnswer = flashcards[selectedCardIndex].backSide.toLowerCase();
+    const userAnswer = userGuess.toLowerCase();
+
+    const maxAllowedDistance = 2;
+
+    const levenshteinDistance = calculateLevenshteinDistance(
+      correctAnswer,
+      userAnswer
+    );
+
+    setIsCorrect(levenshteinDistance <= maxAllowedDistance);
   };
 
   return (
@@ -63,8 +120,40 @@ const App = () => {
         frontSide={flashcards[selectedCardIndex].frontSide}
         backSide={flashcards[selectedCardIndex].backSide}
       />
-      <button className="next-card-btn" onClick={handleNextCard}>
-        Next Card
+      <div className="input-container">
+        <input
+          className="user-input"
+          type="text"
+          placeholder="Enter your guess"
+          value={userGuess}
+          onChange={(e) => setUserGuess(e.target.value)}
+          disabled={showFeedback}
+        />
+        <button
+          className="submit-btn"
+          onClick={handleSubmit}
+          disabled={showFeedback}
+        >
+          Submit
+        </button>
+      </div>
+      {showFeedback && (
+        <div
+          className={`feedback-message ${isCorrect ? "correct" : "incorrect"}`}
+        >
+          {isCorrect ? "Correct!" : "Incorrect!"}
+        </div>
+      )}
+      <div className="button-container">
+        <button className="next-card-btn" onClick={handlePreviousCard}>
+          Back
+        </button>
+        <button className="next-card-btn" onClick={handleNextCard}>
+          Next
+        </button>
+      </div>
+      <button className="next-card-btn" onClick={handleShuffleCards}>
+        Shuffle Cards
       </button>
     </div>
   );
